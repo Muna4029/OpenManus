@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional
-
 from pydantic import Field, model_validator
 
 from app.agent.browser import BrowserContextHelper
@@ -42,10 +40,10 @@ class Manus(ToolCallAgent):
     )
 
     special_tool_names: list[str] = Field(default_factory=lambda: [Terminate().name])
-    browser_context_helper: Optional[BrowserContextHelper] = None
+    browser_context_helper: BrowserContextHelper | None = None
 
     # Track connected MCP servers
-    connected_servers: Dict[str, str] = Field(
+    connected_servers: dict[str, str] = Field(
         default_factory=dict
     )  # server_id -> url/command
     _initialized: bool = False
@@ -93,7 +91,7 @@ class Manus(ToolCallAgent):
         server_url: str,
         server_id: str = "",
         use_stdio: bool = False,
-        stdio_args: List[str] = None,
+        stdio_args: list[str] = None,
     ) -> None:
         """Connect to an MCP server and add its tools."""
         if use_stdio:

@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, List, Optional, Union
+from typing import Any
 
 from pydantic import Field
 
@@ -28,13 +28,13 @@ class ToolCallAgent(ReActAgent):
         CreateChatCompletion(), Terminate()
     )
     tool_choices: TOOL_CHOICE_TYPE = ToolChoice.AUTO  # type: ignore
-    special_tool_names: List[str] = Field(default_factory=lambda: [Terminate().name])
+    special_tool_names: list[str] = Field(default_factory=lambda: [Terminate().name])
 
-    tool_calls: List[ToolCall] = Field(default_factory=list)
-    _current_base64_image: Optional[str] = None
+    tool_calls: list[ToolCall] = Field(default_factory=list)
+    _current_base64_image: str | None = None
 
     max_steps: int = 30
-    max_observe: Optional[Union[int, bool]] = None
+    max_observe: int | bool | None = None
 
     async def think(self) -> bool:
         """Process current state and decide next actions using tools"""
@@ -65,7 +65,7 @@ class ToolCallAgent(ReActAgent):
                 )
                 self.memory.add_message(
                     Message.assistant_message(
-                        f"Maximum token limit reached, cannot continue execution: {str(token_limit_error)}"
+                        f"Maximum token limit reached, cannot continue execution: {token_limit_error!s}"
                     )
                 )
                 self.state = AgentState.FINISHED
@@ -122,9 +122,7 @@ class ToolCallAgent(ReActAgent):
         except Exception as e:
             logger.error(f"🚨 Oops! The {self.name}'s thinking process hit a snag: {e}")
             self.memory.add_message(
-                Message.assistant_message(
-                    f"Error encountered while processing: {str(e)}"
-                )
+                Message.assistant_message(f"Error encountered while processing: {e!s}")
             )
             return False
 
@@ -190,7 +188,7 @@ class ToolCallAgent(ReActAgent):
 
             # Format result for display (standard case)
             observation = (
-                f"Observed output of cmd `{name}` executed:\n{str(result)}"
+                f"Observed output of cmd `{name}` executed:\n{result!s}"
                 if result
                 else f"Cmd `{name}` completed with no output"
             )
@@ -203,7 +201,7 @@ class ToolCallAgent(ReActAgent):
             )
             return f"Error: {error_msg}"
         except Exception as e:
-            error_msg = f"⚠️ Tool '{name}' encountered a problem: {str(e)}"
+            error_msg = f"⚠️ Tool '{name}' encountered a problem: {e!s}"
             logger.exception(error_msg)
             return f"Error: {error_msg}"
 
@@ -242,7 +240,7 @@ class ToolCallAgent(ReActAgent):
                     )
         logger.info(f"✨ Cleanup complete for agent '{self.name}'.")
 
-    async def run(self, request: Optional[str] = None) -> str:
+    async def run(self, request: str | None = None) -> str:
         """Run the agent with cleanup when done."""
         try:
             return await super().run(request)

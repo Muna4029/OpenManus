@@ -9,8 +9,8 @@ from app.agent.toolcall import ToolCallAgent
 __all__ = [
     "BaseAgent",
     "BrowserAgent",
+    "MCPAgent",
     "ReActAgent",
     "SWEAgent",
     "ToolCallAgent",
-    "MCPAgent",
 ]

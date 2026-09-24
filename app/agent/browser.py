@@ -1,5 +1,5 @@
 import json
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pydantic import Field, model_validator
 
@@ -19,9 +19,9 @@ if TYPE_CHECKING:
 class BrowserContextHelper:
     def __init__(self, agent: "BaseAgent"):
         self.agent = agent
-        self._current_base64_image: Optional[str] = None
+        self._current_base64_image: str | None = None
 
-    async def get_browser_state(self) -> Optional[dict]:
+    async def get_browser_state(self) -> dict | None:
         browser_tool = self.agent.available_tools.get_tool(BrowserUseTool().name)
         if not browser_tool:
             browser_tool = self.agent.available_tools.get_tool(
@@ -41,7 +41,7 @@ class BrowserContextHelper:
                 self._current_base64_image = None
             return json.loads(result.output)
         except Exception as e:
-            logger.debug(f"Failed to get browser state: {str(e)}")
+            logger.debug(f"Failed to get browser state: {e!s}")
             return None
 
     async def format_next_step_prompt(self) -> str:
@@ -110,7 +110,7 @@ class BrowserAgent(ToolCallAgent):
     tool_choices: ToolChoice = ToolChoice.AUTO
     special_tool_names: list[str] = Field(default_factory=lambda: [Terminate().name])
 
-    browser_context_helper: Optional[BrowserContextHelper] = None
+    browser_context_helper: BrowserContextHelper | None = None
 
     @model_validator(mode="after")
     def initialize_helper(self) -> "BrowserAgent":
