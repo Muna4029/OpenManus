@@ -1,15 +1,12 @@
-from app.tool.base import BaseTool, ToolResult
-from typing import ClassVar, Dict
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from pathlib import Path
+from typing import Dict, List
+
+from pydantic import Field
+
 from app.config import config
-from app.tool.file_operators import (
-    FileOperator,
-    LocalFileOperator,
-    PathLike,
-    SandboxFileOperator,
-)
-from typing import List
+from app.tool.base import BaseTool, ToolResult
+from app.tool.file_operators import (FileOperator, LocalFileOperator,
+                                     SandboxFileOperator)
+
 
 class SearchHtmlLibraryResponse(ToolResult):
     """Structured response from the SearchHtmlLibrary tool, inheriting ToolResult."""
@@ -49,7 +46,7 @@ class SearchHtmlLibrary(BaseTool):
                 "description": "The theme of bootstrap template to use.",
                 "enum": [
                     # Light themes
-                    "Brite"
+                    "Brite",
                     "Cerulean",
                     "Materia",
                     "Cosmo",
@@ -88,7 +85,7 @@ class SearchHtmlLibrary(BaseTool):
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "enum": ["blockquote", "card", "chart", "indicator", "list", "nav", "nvabar", "progress", "table", "typography"]
+                    "enum": ["blockquote", "card", "chart", "indicator", "list", "nav", "navbar", "progress", "table", "typography"]
                 },
                 "default": ["card", "chart", "table"],
                 "minItems": 2,
@@ -123,7 +120,8 @@ class SearchHtmlLibrary(BaseTool):
         components_content = {}  # Initialize an empty dictionary to store component contents
 
         for component in components:
-            path = f"/home/vm3/JoyZhao/OSPP/OpenManus/workspace/html_library/{component}.html"
+            # Use a relative workspace path for the html library rather than a hard-coded absolute path
+            path = f"workspace/html_library/{component}.html"
             print(f"Reading component: {path}")
 
             try:
