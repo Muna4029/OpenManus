@@ -1,37 +1,31 @@
-from app.tool.base import BaseTool, ToolResult
-from typing import ClassVar, Dict
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from pathlib import Path
-from app.config import config
-from app.tool.file_operators import (
-    FileOperator,
-    LocalFileOperator,
-    PathLike,
-    SandboxFileOperator,
-)
 from typing import List
+
+from app.config import config
+from app.tool.base import BaseTool, ToolResult
+from app.tool.file_operators import (FileOperator, LocalFileOperator,
+                                     SandboxFileOperator)
+
 
 class SearchHtmlLibraryResponse(ToolResult):
     """Structured response from the SearchHtmlLibrary tool, inheriting ToolResult."""
 
     report_bootstrap_theme: str = Field(description="The theme of the bootstrap report")
-    components_content: Dict[str, str] = Field(description="The UI components content as a dictionary (component_name: html_content)")
+    components_content: Dict[str, str] = Field(
+        description="The UI components content as a dictionary (component_name: html_content)"
+    )
 
     def __str__(self) -> str:
         """Formatted string with indented HTML content"""
         components_info = []
         for name, content in self.components_content.items():
-            components_info.append(
-                f"【{name}】\n"
-                f"{content.strip()}\n"
-                f"{'-'*40}"
-            )
+            components_info.append(f"【{name}】\n{content.strip()}\n{'-' * 40}")
 
         return (
             f"📊 Report Theme: {self.report_bootstrap_theme}\n\n"
             f"🛠️ Components Content:\n\n"
             f"{'\n'.join(components_info)}"
         )
+
 
 class SearchHtmlLibrary(BaseTool):
     """A tool for searching the html library in users' local file system"""
@@ -45,11 +39,11 @@ class SearchHtmlLibrary(BaseTool):
     parameters: dict = {
         "type": "object",
         "properties": {
-            "report_bootstrap_theme":{
+            "report_bootstrap_theme": {
                 "description": "The theme of bootstrap template to use.",
                 "enum": [
                     # Light themes
-                    "Brite"
+                    "Brite",
                     "Cerulean",
                     "Materia",
                     "Cosmo",
@@ -65,7 +59,6 @@ class SearchHtmlLibrary(BaseTool):
                     "Spacelab",
                     "United",
                     "Zephyr",
-
                     # Dark themes
                     "Cyborg",
                     "Darkly",
@@ -74,11 +67,10 @@ class SearchHtmlLibrary(BaseTool):
                     "Superhero",
                     "Vapor",
                     "Lux",
-
                     # Special styles
                     "Quartz",
                     "Morph",
-                    "Yeti"
+                    "Yeti",
                 ],
                 "default": "Materia",
                 "type": "string",
@@ -88,12 +80,23 @@ class SearchHtmlLibrary(BaseTool):
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "enum": ["blockquote", "card", "chart", "indicator", "list", "nav", "nvabar", "progress", "table", "typography"]
+                    "enum": [
+                        "blockquote",
+                        "card",
+                        "chart",
+                        "indicator",
+                        "list",
+                        "nav",
+                        "navbar",
+                        "progress",
+                        "table",
+                        "typography",
+                    ],
                 },
                 "default": ["card", "chart", "table"],
                 "minItems": 2,
-                "uniqueItems": True
-            }
+                "uniqueItems": True,
+            },
         },
         "required": ["report_bootstrap_theme", "components"],
     }
@@ -111,9 +114,7 @@ class SearchHtmlLibrary(BaseTool):
         )
 
     async def execute(
-        self,
-        report_bootstrap_theme: str,
-        components: List[str]
+        self, report_bootstrap_theme: str, components: List[str]
     ) -> SearchHtmlLibraryResponse:
         """
         Execute the tool with the given parameters.
@@ -135,8 +136,7 @@ class SearchHtmlLibrary(BaseTool):
                 print(f"Failed to read component {component}: {str(e)}")
                 components_content[component] = f"Error loading {component} component"
 
-        theme=f"https://cdn.jsdelivr.net/npm/bootswatch@5/dist/{report_bootstrap_theme.lower()}/bootstrap.min.css"
+        theme = f"https://cdn.jsdelivr.net/npm/bootswatch@5/dist/{report_bootstrap_theme.lower()}/bootstrap.min.css"
         return SearchHtmlLibraryResponse(
-            report_bootstrap_theme=theme,
-            components_content=components_content
+            report_bootstrap_theme=theme, components_content=components_content
         )
